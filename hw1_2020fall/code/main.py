@@ -51,9 +51,10 @@ def main():
 
     result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
     plt.bar([x for x in range(result.shape[1])], result.flatten())
-    print(result.shape)
+
     print(result.sum())
-    print(opts.L)
+    last_ten = result
+
 
     ## Q2.1-2.4
     # n_cpu = util.get_num_CPU()

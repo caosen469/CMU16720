@@ -49,7 +49,7 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
 
     # compute the histogram of the finest layer
     # weights = pow(2, -L), weight for the last layer is always 1/2
-    weight = 0.5
+    finest_layer_weight = 0.5
 
     # devide the word map into cells
     parts = pow(2, L) # devide the image into 2^L parts
@@ -78,15 +78,53 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
 
     # Normalized the histogram, this is the L1 histogram for the fines layer
     normalized_partition = partition_contented / partition_contented.sum()
+    weighted_normalized_partition = finest_layer_weight * normalized_partition
 
-    Pyramid = normalized_partition
+    # Pyramid = normalized_partition
+
+    # for each in reversed(range(L)):
+    #     Layer_partion = np.empty((0,1))
+    #     splited_partiton = np.split(normalized_partition, normalized_partition.shape[1]/4, axis=1)
+    #
+    #     for each in range(len(splited_partiton)):
+    #         sum = splited_partiton[each].sum()
+    #         Pyramid = np.append(Pyramid, np.array([[sum]]).reshape(1,1))
+    # Pyramid = Pyramid.reshape(1, Pyramid.shape[0])
+    # print(Pyramid)
+
+    # return Pyramid
+
+
+
+    Pyramid = weighted_normalized_partition
+    Other_Layers = np.empty((L, 0))
+    count = 1
 
     for each in reversed(range(L)):
+        This_layer = np.empty((1,0))
+        if each == 0:
+            This_layer_weight = pow(2, -L)
+        else:
+            This_layer_weight = finest_layer_weight * pow(2, -count)
+        print(This_layer_weight)
+        splited_partiton = np.split(normalized_partition, normalized_partition.shape[1]/pow(4, count), axis=1)
+        count += 1
 
+        for each in range(len(splited_partiton)):
+            sum = splited_partiton[each].sum()
 
+            This_layer = np.concatenate((This_layer, np.array([[sum]]).reshape(1,1)),axis=1)
 
+            Weighted_This_Layer = This_layer * This_layer_weight
 
-    return normalized_partition
+        Other_Layers = np.concatenate((Other_Layers, Weighted_This_Layer), axis=1)
+    Other_Layers = Other_Layers.flatten()
+    Other_Layers = Other_Layers.reshape((1, Other_Layers.shape[0]))
+    print(Pyramid.shape)
+    print(Other_Layers.shape)
+    Pyramid = np.concatenate((Pyramid, Other_Layers), axis=1)
+    hist_all = Pyramid
+    return hist_all
 
 
 def get_image_feature(opts, img_path, dictionary):
