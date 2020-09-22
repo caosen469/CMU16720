@@ -104,7 +104,7 @@ def compute_dictionary(opts, n_worker=1):
     [input]
     * opts         : options
     * n_worker     : number of workers to process in parallel
-    
+
     [saved]
     * dictionary : numpy.ndarray of shape (K,3F)
     '''
@@ -151,7 +151,7 @@ def get_visual_words(opts, img, dictionary):
     [input]
     * opts    : options
     * img    : numpy.ndarray of shape (H,W) or (H,W,3)
-    
+
     [output]
     * wordmap: numpy.ndarray of shape (H,W)
     '''
@@ -168,5 +168,4 @@ def get_visual_words(opts, img, dictionary):
             distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, 24), dictionary)
             closet = distance.argmin()
             wordmap[i, j] = closet
-    print(wordmap.shape)
     return wordmap

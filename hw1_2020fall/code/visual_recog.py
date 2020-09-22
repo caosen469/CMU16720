@@ -22,7 +22,12 @@ def get_feature_from_wordmap(opts, wordmap):
 
     K = opts.K
     # ----- TODO -----
-    pass
+    print(np.histogram(wordmap)[0].shape)
+    result = np.histogram(wordmap, bins=[a for a in range(K+1)])
+    return result[0]/result[0].sum()
+    # result = np.histogram(wordmap, bins=[a for a in range(K+1)])
+    # print(K)
+    # return result[0]
 
 def get_feature_from_wordmap_SPM(opts, wordmap):
     '''
