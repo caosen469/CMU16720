@@ -6,7 +6,7 @@ from PIL import Image
 import scipy.ndimage
 import skimage.color
 
-import sklearn
+import sklearn.cluster as cluster
 
 
 def extract_filter_responses(opts, img):
@@ -87,7 +87,7 @@ def compute_dictionary_one_image(opts, img):
         # randx = np.random.randint(0, img.shape[0] - 1, (img.shape[0], 1))
         # randy = np.random.randint(0, img.shape[1] - 1, (img.shape[1], 1))
         # print(filter_response.shape)
-        one_feature = all_response[int(randx), int(randy), :].reshape((1,24))
+        one_feature = all_response[int(randx), int(randy), :].reshape((1, 24))
         dictionary = np.concatenate((dictionary, one_feature), axis=0)
         # print(one_feature)
         # print(filter_response.shape)
@@ -95,7 +95,6 @@ def compute_dictionary_one_image(opts, img):
     np.save(join(opts.out_dir, 'dictionary.npy'), dictionary)
     # print(dictionary)
     return dictionary
-
 
 
 def compute_dictionary(opts, n_worker=1):
@@ -139,7 +138,7 @@ def compute_dictionary(opts, n_worker=1):
 
     ## example code snippet to save the dictionary
     # np.save(join(out_dir, 'dictionary.npy'), dictionary)
-    kmeans = sklearn.cluster.KMeans(n_clusters=K).fit(filter_responses)
+    kmeans = cluster.KMeans(n_clusters=K).fit(filter_responses)
     dictionary = kmeans.cluster_centers_
     np.save(join(out_dir, 'dictionary.npy'), dictionary)
     return dictionary
@@ -158,4 +157,16 @@ def get_visual_words(opts, img, dictionary):
     '''
 
     # ----- TODO -----
-    pass
+    all_response_oneImage = extract_filter_responses(opts, img)
+    # print(all_response_oneImage[1,1,:].reshape(1,24))
+    # wordmap = np.empty((img.shape[0], img.shape[1], 3))
+    wordmap = np.empty((img.shape[0], img.shape[1]))
+    # For one pixel:
+
+    for i in range(all_response_oneImage.shape[0]):
+        for j in range(all_response_oneImage.shape[1]):
+            distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, 24), dictionary)
+            closet = distance.argmin()
+            wordmap[i, j] = closet
+    print(wordmap.shape)
+    return wordmap
