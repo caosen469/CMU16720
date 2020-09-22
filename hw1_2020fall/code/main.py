@@ -44,9 +44,17 @@ def main():
     wordmap = visual_words.get_visual_words(opts, img, dictionary)
     # util.visualize_wordmap(wordmap)
 
-    result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
-
+    # result = visual_recog.get_feature_from_wordmap(opts, wordmap)
+    #
     # print(result)
+    # plt.bar([x for x in range(10)], result)
+
+    result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
+    plt.bar([x for x in range(result.shape[1])], result.flatten())
+    print(result.shape)
+    print(result.sum())
+    print(opts.L)
+
     ## Q2.1-2.4
     # n_cpu = util.get_num_CPU()
     # visual_recog.build_recognition_system(opts, n_worker=n_cpu)

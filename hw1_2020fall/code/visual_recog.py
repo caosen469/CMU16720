@@ -24,10 +24,12 @@ def get_feature_from_wordmap(opts, wordmap):
     # ----- TODO -----
     # print(np.histogram(wordmap)[0].shape)
     result = np.histogram(wordmap, bins=[a for a in range(K+1)])
+    result = np.histogram(wordmap,)
+
+    # L1 Normalized
     return result[0]/result[0].sum()
-    # result = np.histogram(wordmap, bins=[a for a in range(K+1)])
-    # print(K)
-    # return result[0]
+
+
 
 def get_feature_from_wordmap_SPM(opts, wordmap):
     '''
@@ -40,7 +42,7 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     [output]
     * hist_all: numpy.ndarray of shape (K*(4^L-1)/3)
     '''
-        
+
     K = opts.K
     L = opts.L
     # ----- TODO -----
@@ -57,8 +59,8 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     partition_height = height // pow(2, L)
 
     partition_result = []
-    partition_contented = np.empty((0, K))
-    print(partition_contented.shape)
+    partition_contented = np.empty((0, 10))
+    # print(partition_contented.shape)
 
     for row in range(pow(2,L)):
         for column in range(pow(2, L)):
@@ -67,13 +69,24 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
             partition = wordmap[row*partition_width:(row+1)*partition_width, column*partition_height:(column+1)*partition_height]
             # calculate the histogram for that partition
             partition_histogram = get_feature_from_wordmap(opts, partition).reshape(1,K)
-            print(partition_histogram.shape)
+            # print(partition_histogram.shape)
             # contenate the histogram the result
-            # partition_contented = np.append((partition_contented, partition_histogram), axis=0)
+            partition_contented = np.concatenate((partition_contented, partition_histogram), axis=0)
+
+    partition_contented = partition_contented.reshape((1, partition_contented.shape[0]*partition_contented.shape[1]))
+    # print((partition_contented / partition_contented.sum()).sum())
+
+    # Normalized the histogram, this is the L1 histogram for the fines layer
+    normalized_partition = partition_contented / partition_contented.sum()
+
+    Pyramid = normalized_partition
+
+    for each in reversed(range(L)):
 
 
-            partition_result.append(partition_histogram)
-    return partition_contented
+
+
+    return normalized_partition
 
 
 def get_image_feature(opts, img_path, dictionary):
