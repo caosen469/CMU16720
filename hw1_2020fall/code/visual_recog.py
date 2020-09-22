@@ -22,7 +22,7 @@ def get_feature_from_wordmap(opts, wordmap):
 
     K = opts.K
     # ----- TODO -----
-    print(np.histogram(wordmap)[0].shape)
+    # print(np.histogram(wordmap)[0].shape)
     result = np.histogram(wordmap, bins=[a for a in range(K+1)])
     return result[0]/result[0].sum()
     # result = np.histogram(wordmap, bins=[a for a in range(K+1)])
@@ -44,8 +44,29 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     K = opts.K
     L = opts.L
     # ----- TODO -----
-    pass
-    
+
+    # compute the histogram of the finest layer
+    # weights = pow(2, -L), weight for the last layer is always 1/2
+    weight = 0.5
+
+    # devide the word map into cells
+    parts = pow(2, L) # devide the image into 2^L parts
+    width = wordmap.shape[0]
+    height = wordmap.shape[1]
+    partition_width = width // pow(2,L)
+    partition_height = height // pow(2, L)
+
+    partition_result = []
+
+    for row in range(pow(2,L)):
+        for column in range(pow(2, L)):
+            # print([row, column])
+            partition = wordmap[row*partition_width:(row+1)*partition_width, column*partition_height:(column+1)*partition_height]
+            partition_histogram = get_feature_from_wordmap(opts, partition).reshape(1,K)
+            partition_result.append(partition_histogram)
+    return partition_result
+
+
 def get_image_feature(opts, img_path, dictionary):
     '''
     Extracts the spatial pyramid matching feature.

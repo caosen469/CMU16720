@@ -42,10 +42,10 @@ def main():
     img = np.array(img).astype(np.float32)/255
     dictionary = np.load(join(opts.out_dir, 'dictionary.npy'))
     wordmap = visual_words.get_visual_words(opts, img, dictionary)
-    util.visualize_wordmap(wordmap)
+    # util.visualize_wordmap(wordmap)
 
     result = visual_recog.get_feature_from_wordmap(opts, wordmap)
-    print(result)
+    # print(result)
     ## Q2.1-2.4
     # n_cpu = util.get_num_CPU()
     # visual_recog.build_recognition_system(opts, n_worker=n_cpu)
