@@ -57,14 +57,23 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     partition_height = height // pow(2, L)
 
     partition_result = []
+    partition_contented = np.empty((0, K))
+    print(partition_contented.shape)
 
     for row in range(pow(2,L)):
         for column in range(pow(2, L)):
             # print([row, column])
+            # each partition
             partition = wordmap[row*partition_width:(row+1)*partition_width, column*partition_height:(column+1)*partition_height]
+            # calculate the histogram for that partition
             partition_histogram = get_feature_from_wordmap(opts, partition).reshape(1,K)
+            print(partition_histogram.shape)
+            # contenate the histogram the result
+            # partition_contented = np.append((partition_contented, partition_histogram), axis=0)
+
+
             partition_result.append(partition_histogram)
-    return partition_result
+    return partition_contented
 
 
 def get_image_feature(opts, img_path, dictionary):

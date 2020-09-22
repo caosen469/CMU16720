@@ -44,7 +44,8 @@ def main():
     wordmap = visual_words.get_visual_words(opts, img, dictionary)
     # util.visualize_wordmap(wordmap)
 
-    result = visual_recog.get_feature_from_wordmap(opts, wordmap)
+    result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
+
     # print(result)
     ## Q2.1-2.4
     # n_cpu = util.get_num_CPU()
