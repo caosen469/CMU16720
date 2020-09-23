@@ -23,12 +23,10 @@ def get_feature_from_wordmap(opts, wordmap):
     K = opts.K
     # ----- TODO -----
     # print(np.histogram(wordmap)[0].shape)
-    result = np.histogram(wordmap, bins=[a for a in range(K+1)])
-    result = np.histogram(wordmap,)
+    result = np.histogram(wordmap, bins=[a for a in range(K + 1)])
 
     # L1 Normalized
-    return result[0]/result[0].sum()
-
+    return result[0] / result[0].sum()
 
 
 def get_feature_from_wordmap_SPM(opts, wordmap):
@@ -52,28 +50,29 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     finest_layer_weight = 0.5
 
     # devide the word map into cells
-    parts = pow(2, L) # devide the image into 2^L parts
+    parts = pow(2, L)  # devide the image into 2^L parts
     width = wordmap.shape[0]
     height = wordmap.shape[1]
-    partition_width = width // pow(2,L)
+    partition_width = width // pow(2, L)
     partition_height = height // pow(2, L)
 
     partition_result = []
     partition_contented = np.empty((0, 10))
     # print(partition_contented.shape)
 
-    for row in range(pow(2,L)):
+    for row in range(pow(2, L)):
         for column in range(pow(2, L)):
             # print([row, column])
             # each partition
-            partition = wordmap[row*partition_width:(row+1)*partition_width, column*partition_height:(column+1)*partition_height]
+            partition = wordmap[row * partition_width:(row + 1) * partition_width,
+                        column * partition_height:(column + 1) * partition_height]
             # calculate the histogram for that partition
-            partition_histogram = get_feature_from_wordmap(opts, partition).reshape(1,K)
+            partition_histogram = get_feature_from_wordmap(opts, partition).reshape(1, K)
             # print(partition_histogram.shape)
             # contenate the histogram the result
             partition_contented = np.concatenate((partition_contented, partition_histogram), axis=0)
 
-    partition_contented = partition_contented.reshape((1, partition_contented.shape[0]*partition_contented.shape[1]))
+    partition_contented = partition_contented.reshape((1, partition_contented.shape[0] * partition_contented.shape[1]))
     # print((partition_contented / partition_contented.sum()).sum())
 
     # Normalized the histogram, this is the L1 histogram for the fines layer
@@ -94,26 +93,24 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
 
     # return Pyramid
 
-
-
     Pyramid = weighted_normalized_partition
     Other_Layers = np.empty((L, 0))
     count = 1
 
     for each in reversed(range(L)):
-        This_layer = np.empty((1,0))
+        This_layer = np.empty((1, 0))
         if each == 0:
             This_layer_weight = pow(2, -L)
         else:
             This_layer_weight = finest_layer_weight * pow(2, -count)
         # print(This_layer_weight)
-        splited_partiton = np.split(normalized_partition, normalized_partition.shape[1]/pow(4, count), axis=1)
+        splited_partiton = np.split(normalized_partition, normalized_partition.shape[1] / pow(4, count), axis=1)
         count += 1
 
         for each in range(len(splited_partiton)):
             sum = splited_partiton[each].sum()
 
-            This_layer = np.concatenate((This_layer, np.array([[sum]]).reshape(1,1)),axis=1)
+            This_layer = np.concatenate((This_layer, np.array([[sum]]).reshape(1, 1)), axis=1)
 
             Weighted_This_Layer = This_layer * This_layer_weight
 
@@ -123,7 +120,8 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     # print(Pyramid.shape)
     # print(Other_Layers.shape)
     Pyramid = np.concatenate((Pyramid, Other_Layers), axis=1)
-    hist_all = Pyramid
+    hist_all = Pyramid.reshape((Pyramid.shape[1]))
+    print(hist_all.shape)
     return hist_all
 
 
@@ -142,7 +140,16 @@ def get_image_feature(opts, img_path, dictionary):
     '''
 
     # ----- TODO -----
-    pass
+    # Build the image
+    img = Image.open(img_path)
+    img = np.array(img).astype(np.float32) / 255
+
+    # Get the wordmap
+    wordmap = visual_words.get_visual_words(opts, img, dictionary)
+    feature = get_feature_from_wordmap_SPM(opts, wordmap)
+
+    return feature
+
 
 def build_recognition_system(opts, n_worker=1):
     '''
@@ -168,15 +175,30 @@ def build_recognition_system(opts, n_worker=1):
     dictionary = np.load(join(out_dir, 'dictionary.npy'))
 
     # ----- TODO -----
-    pass
+    # # generate the dictionary
+    # dictionary = visual_words.compute_dictionary(opts)
 
-    ## example code snippet to save the learned system
-    # np.savez_compressed(join(out_dir, 'trained_system.npz'),
-    #     features=features,
-    #     labels=train_labels,
-    #     dictionary=dictionary,
-    #     SPM_layer_num=SPM_layer_num,
-    # )
+    # Create features
+    first_image_path = join(data_dir, train_files[0])
+    len_features = get_image_feature(opts, first_image_path, dictionary).shape[0]
+    features = np.zeros((0, len_features))
+    for each in train_files:
+        img_path = join(data_dir, each)
+        feature = get_image_feature(opts, img_path, dictionary)
+        feature = feature.reshape(1, len_features)
+        features = np.concatenate((features, feature), axis=0)
+
+    # Creating labels
+    labels = train_labels
+
+    # example code snippet to save the learned system
+    np.savez_compressed(join(out_dir, 'trained_system.npz'),
+                        features=features,
+                        labels=train_labels,
+                        dictionary=dictionary,
+                        SPM_layer_num=SPM_layer_num,
+                        )
+
 
 def distance_to_set(word_hist, histograms):
     '''
@@ -195,7 +217,8 @@ def distance_to_set(word_hist, histograms):
     minimum_bin = np.minimum(histograms, word_hist)
     score_eachImgae = np.sum(minimum_bin, axis=1)
     sim = 1 - minimum_bin
-    
+
+
 def evaluate_recognition_system(opts, n_worker=1):
     '''
     Evaluates the recognition system for all test images and returns the confusion matrix.
@@ -225,4 +248,3 @@ def evaluate_recognition_system(opts, n_worker=1):
 
     # ----- TODO -----
     pass
-
