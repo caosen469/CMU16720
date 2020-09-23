@@ -106,7 +106,7 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
             This_layer_weight = pow(2, -L)
         else:
             This_layer_weight = finest_layer_weight * pow(2, -count)
-        print(This_layer_weight)
+        # print(This_layer_weight)
         splited_partiton = np.split(normalized_partition, normalized_partition.shape[1]/pow(4, count), axis=1)
         count += 1
 
@@ -120,8 +120,8 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
         Other_Layers = np.concatenate((Other_Layers, Weighted_This_Layer), axis=1)
     Other_Layers = Other_Layers.flatten()
     Other_Layers = Other_Layers.reshape((1, Other_Layers.shape[0]))
-    print(Pyramid.shape)
-    print(Other_Layers.shape)
+    # print(Pyramid.shape)
+    # print(Other_Layers.shape)
     Pyramid = np.concatenate((Pyramid, Other_Layers), axis=1)
     hist_all = Pyramid
     return hist_all
@@ -191,7 +191,10 @@ def distance_to_set(word_hist, histograms):
     '''
 
     # ----- TODO -----
-    pass    
+    # compute the minimum for each row
+    minimum_bin = np.minimum(histograms, word_hist)
+    score_eachImgae = np.sum(minimum_bin, axis=1)
+    sim = 1 - minimum_bin
     
 def evaluate_recognition_system(opts, n_worker=1):
     '''

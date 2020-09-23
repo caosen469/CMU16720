@@ -50,7 +50,7 @@ def main():
     # plt.bar([x for x in range(10)], result)
 
     result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
-    plt.bar([x for x in range(result.shape[1])], result.flatten())
+    # plt.bar([x for x in range(result.shape[1])], result.flatten())
 
     print(result.sum())
     last_ten = result
