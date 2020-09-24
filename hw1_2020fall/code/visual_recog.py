@@ -248,10 +248,16 @@ def evaluate_recognition_system(opts, n_worker=1):
     test_labels = np.loadtxt(join(data_dir, 'test_labels.txt'), np.int32)
 
     # ----- TODO -----
+    # Set an empty confusion matrix
+    conf = np.zeros((8, 8))
+    # Set the accuracy
+    accuracy = 0
+
+
     # Load the training data and the label
     test_files = open(join(data_dir, 'test_files.txt')).read().splitlines()
     test_labels = np.loadtxt(join(data_dir, 'test_labels.txt'), np.int32)
-
+    count = 0
     for one_test_path in test_files:
         test_image_path = join(data_dir, one_test_path)
         features = get_image_feature(opts, test_image_path, dictionary)
@@ -261,6 +267,18 @@ def evaluate_recognition_system(opts, n_worker=1):
         predict_type_position = np.argmin(distance)
         # predicted result, which is a number from 0 to 7
         predict_result = trained_system['labels'][predict_type_position]
+
+        # add it to the confusion matrix
+        j = predict_result
+        i = test_labels[count]
+        conf[i, j] += 1
+
+        if predict_result == test_labels[count]:
+            accuracy += 1
+        count += 1
+    accuracy = accuracy / test_labels.shape[0]
+
+    return [conf, accuracy]
 
     # test_image_path = join(data_dir, test_files[100])
     # features = get_image_feature(opts, test_image_path, dictionary)
