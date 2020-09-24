@@ -58,6 +58,7 @@ def extract_filter_responses(opts, img):
 
     # filter_responses = np.concatenate([img_scale[0], img_scale[1]], axis=-1)
     filter_responses = np.concatenate(img_scale, axis=-1)
+
     return filter_responses
 
 
@@ -141,6 +142,7 @@ def compute_dictionary(opts, n_worker=1):
     kmeans = cluster.KMeans(n_clusters=K).fit(filter_responses)
     dictionary = kmeans.cluster_centers_
     np.save(join(out_dir, 'dictionary.npy'), dictionary)
+    print(dictionary.shape)
     return dictionary
 
 
@@ -165,7 +167,9 @@ def get_visual_words(opts, img, dictionary):
 
     for i in range(all_response_oneImage.shape[0]):
         for j in range(all_response_oneImage.shape[1]):
-            distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, 24), dictionary)
+            # distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, ), dictionary)
+
+            distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, len(opts.filter_scales)*12), dictionary)
             closet = distance.argmin()
             wordmap[i, j] = closet
     return wordmap

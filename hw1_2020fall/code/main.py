@@ -22,10 +22,10 @@ def main():
     # filter_responses = visual_words.extract_filter_responses(opts, img)
     # util.display_filter_responses(opts, filter_responses)
 
-    # # Apply on aquarium/sun_aztvjgubyrgvirup.jpg
+    # Apply on aquarium/sun_aztvjgubyrgvirup.jpg
     # opts.filter_scales = [1, 2, 3]
-    # img_path2 = join(opts.data_dir, 'aquarium/sun_aztvjgubyrgvirup.jpg')
-    # img2 = Image.open(img_path2)
+    img_path2 = join(opts.data_dir, 'aquarium/sun_aztvjgubyrgvirup.jpg')
+    img2 = Image.open(img_path2)
     # img2 = np.array(img2).astype(np.float32)/255
     # filter_responses = visual_words.extract_filter_responses(opts, img2)
     # util.display_filter_responses(opts, filter_responses)
@@ -37,23 +37,23 @@ def main():
     # visual_words.compute_dictionary(opts)
 
     # Q1.3
-    img_path = join(opts.data_dir, 'windmill/sun_aikuhxyiwwjfesba.jpg')
+    img_path = join(opts.data_dir, 'waterfall/sun_aastyysdvtnkdcvt.jpg')
     img = Image.open(img_path)
     img = np.array(img).astype(np.float32)/255
     dictionary = np.load(join(opts.out_dir, 'dictionary.npy'))
     wordmap = visual_words.get_visual_words(opts, img, dictionary)
-    # util.visualize_wordmap(wordmap)
+    util.visualize_wordmap(wordmap)
 
     # result = visual_recog.get_feature_from_wordmap(opts, wordmap)
     #
     # print(result)
     # plt.bar([x for x in range(10)], result)
 
-    result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
+    # result = visual_recog.get_feature_from_wordmap_SPM(opts, wordmap)
     # plt.bar([x for x in range(result.shape[1])], result.flatten())
 
-    print(result.sum())
-    last_ten = result
+    # print(result.sum())
+    # last_ten = result
 
 
     ## Q2.1-2.4
@@ -64,12 +64,12 @@ def main():
     ## Q2.5
     # n_cpu = util.get_num_CPU()
     # conf, accuracy = visual_recog.evaluate_recognition_system(opts, n_worker=n_cpu)
-    conf, accuracy = visual_recog.evaluate_recognition_system(opts)
-
-    print(conf)
-    print(accuracy)
-    np.savetxt(join(opts.out_dir, 'confmat.csv'), conf, fmt='%d', delimiter=',')
-    np.savetxt(join(opts.out_dir, 'accuracy.txt'), [accuracy], fmt='%g')
+    # conf, accuracy = visual_recog.evaluate_recognition_system(opts)
+    #
+    # print(conf)
+    # print(accuracy)
+    # np.savetxt(join(opts.out_dir, 'confmat.csv'), conf, fmt='%d', delimiter=',')
+    # np.savetxt(join(opts.out_dir, 'accuracy.txt'), [accuracy], fmt='%g')
 
 
 if __name__ == '__main__':
