@@ -94,8 +94,9 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     # return Pyramid
 
     Pyramid = weighted_normalized_partition
-    Other_Layers = np.empty((L, 0))
+    # Other_Layers = np.empty((L, 0))
     count = 1
+    Other_Layers = []
 
     for each in reversed(range(L)):
         This_layer = np.empty((1, 0))
@@ -114,14 +115,20 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
 
             Weighted_This_Layer = This_layer * This_layer_weight
 
-        Other_Layers = np.concatenate((Other_Layers, Weighted_This_Layer), axis=1)
-    Other_Layers = Other_Layers.flatten()
-    Other_Layers = Other_Layers.reshape((1, Other_Layers.shape[0]))
-    # print(Pyramid.shape)
+        # Other_Layers = np.concatenate((Other_Layers, Weighted_This_Layer), axis=1)
+        Other_Layers.append(Weighted_This_Layer)
+
+
+    Other_Layers_np = np.empty((1,0))
+    for i in reversed(range(len(Other_Layers))):
+        Other_Layers_np = np.concatenate((Other_Layers_np, Other_Layers[i]), axis=1)
+    Other_Layers_np = Other_Layers_np.flatten()
+    Other_Layers_np = Other_Layers_np.reshape((1, Other_Layers_np.shape[0]))
+
     # print(Other_Layers.shape)
-    Pyramid = np.concatenate((Pyramid, Other_Layers), axis=1)
+    Pyramid = np.concatenate((Pyramid, Other_Layers_np), axis=1)
     hist_all = Pyramid.reshape((Pyramid.shape[1]))
-    print(hist_all.shape)
+
     return hist_all
 
 
@@ -255,8 +262,7 @@ def evaluate_recognition_system(opts, n_worker=1):
 
 
     # Load the training data and the label
-    test_files = open(join(data_dir, 'test_files.txt')).read().splitlines()
-    test_labels = np.loadtxt(join(data_dir, 'test_labels.txt'), np.int32)
+
     count = 0
     for one_test_path in test_files:
         test_image_path = join(data_dir, one_test_path)
@@ -275,14 +281,15 @@ def evaluate_recognition_system(opts, n_worker=1):
 
         if predict_result == test_labels[count]:
             accuracy += 1
+        else:
+            print('###########')
+            print(test_image_path)
+            print(predict_result)
+            print(test_labels[count])
+            print('###########')
+
         count += 1
     accuracy = accuracy / test_labels.shape[0]
 
     return [conf, accuracy]
 
-    # test_image_path = join(data_dir, test_files[100])
-    # features = get_image_feature(opts, test_image_path, dictionary)
-    # result = distance_to_set(features, trained_system['features'])
-    # prediction = np.argmin(result)
-    # print(test_image_path)
-    # print(trained_system['labels'][prediction])

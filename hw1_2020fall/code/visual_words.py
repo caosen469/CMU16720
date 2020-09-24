@@ -88,7 +88,7 @@ def compute_dictionary_one_image(opts, img):
         # randx = np.random.randint(0, img.shape[0] - 1, (img.shape[0], 1))
         # randy = np.random.randint(0, img.shape[1] - 1, (img.shape[1], 1))
         # print(filter_response.shape)
-        one_feature = all_response[int(randx), int(randy), :].reshape((1, 24))
+        one_feature = all_response[int(randx), int(randy), :].reshape((1, 12*len(opts.filter_scales)))
         dictionary = np.concatenate((dictionary, one_feature), axis=0)
         # print(one_feature)
         # print(filter_response.shape)
@@ -142,7 +142,7 @@ def compute_dictionary(opts, n_worker=1):
     kmeans = cluster.KMeans(n_clusters=K).fit(filter_responses)
     dictionary = kmeans.cluster_centers_
     np.save(join(out_dir, 'dictionary.npy'), dictionary)
-    print(dictionary.shape)
+    # print(dictionary.shape)
     return dictionary
 
 
@@ -168,7 +168,8 @@ def get_visual_words(opts, img, dictionary):
     for i in range(all_response_oneImage.shape[0]):
         for j in range(all_response_oneImage.shape[1]):
             # distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, ), dictionary)
-
+            # print(all_response_oneImage[i, j, :].shape)
+            # print(dictionary.shape)
             distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, len(opts.filter_scales)*12), dictionary)
             closet = distance.argmin()
             wordmap[i, j] = closet
