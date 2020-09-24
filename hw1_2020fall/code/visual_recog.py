@@ -216,7 +216,8 @@ def distance_to_set(word_hist, histograms):
     # compute the minimum for each row
     minimum_bin = np.minimum(histograms, word_hist)
     score_eachImgae = np.sum(minimum_bin, axis=1)
-    sim = 1 - minimum_bin
+    sim = 1 - score_eachImgae
+    return sim
 
 
 def evaluate_recognition_system(opts, n_worker=1):
@@ -247,4 +248,13 @@ def evaluate_recognition_system(opts, n_worker=1):
     test_labels = np.loadtxt(join(data_dir, 'test_labels.txt'), np.int32)
 
     # ----- TODO -----
-    pass
+    # Load the training data and the label
+    test_files = open(join(data_dir, 'test_files.txt')).read().splitlines()
+    test_labels = np.loadtxt(join(data_dir, 'test_labels.txt'), np.int32)
+
+    for one_test_path in test_files:
+        test_image_path = join(data_dir, one_test_path)
+        features = get_image_feature(opts, test_image_path, dictionary)
+        result = distance_to_set(features, trained_system['features'])
+        print(result)
+
