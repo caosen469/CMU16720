@@ -255,6 +255,16 @@ def evaluate_recognition_system(opts, n_worker=1):
     for one_test_path in test_files:
         test_image_path = join(data_dir, one_test_path)
         features = get_image_feature(opts, test_image_path, dictionary)
-        result = distance_to_set(features, trained_system['features'])
-        print(result)
+        # The distance between test image and each trained image
+        distance = distance_to_set(features, trained_system['features'])
+        # The shortest distance trained image
+        predict_type_position = np.argmin(distance)
+        # predicted result, which is a number from 0 to 7
+        predict_result = trained_system['labels'][predict_type_position]
 
+    # test_image_path = join(data_dir, test_files[100])
+    # features = get_image_feature(opts, test_image_path, dictionary)
+    # result = distance_to_set(features, trained_system['features'])
+    # prediction = np.argmin(result)
+    # print(test_image_path)
+    # print(trained_system['labels'][prediction])
