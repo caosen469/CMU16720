@@ -2,7 +2,6 @@ from os.path import join
 
 import numpy as np
 from PIL import Image
-import matplotlib.pyplot as plt
 
 import util
 import visual_words
@@ -34,13 +33,13 @@ def main():
     ## Q1.2
     # n_cpu = util.get_num_CPU()
     # visual_words.compute_dictionary(opts, n_worker=n_cpu)
-    visual_words.compute_dictionary(opts)
+    # visual_words.compute_dictionary(opts)
 
     # Q1.3
     img_path = join(opts.data_dir, 'waterfall/sun_aastyysdvtnkdcvt.jpg')
     img = Image.open(img_path)
     img = np.array(img).astype(np.float32)/255
-    dictionary = np.load(join(opts.out_dir, 'dictionary.npy'))
+    # dictionary = np.load(join(opts.out_dir, 'dictionary.npy'))
     # wordmap = visual_words.get_visual_words(opts, img, dictionary)
     # util.visualize_wordmap(wordmap)
 
@@ -49,14 +48,14 @@ def main():
 
 
     ## Q2.1-2.4
-    # n_cpu = util.get_num_CPU()
-    # visual_recog.build_recognition_system(opts, n_worker=n_cpu)
-    visual_recog.build_recognition_system(opts)
+    n_cpu = util.get_num_CPU()
+    visual_recog.build_recognition_system(opts, n_worker=n_cpu-1)
+    # visual_recog.build_recognition_system(opts)
 
     ## Q2.5
-    # n_cpu = util.get_num_CPU()
-    # conf, accuracy = visual_recog.evaluate_recognition_system(opts, n_worker=n_cpu)
-    conf, accuracy = visual_recog.evaluate_recognition_system(opts)
+    n_cpu = util.get_num_CPU()
+    conf, accuracy = visual_recog.evaluate_recognition_system(opts, n_worker=n_cpu-1)
+    #conf, accuracy = visual_recog.evaluate_recognition_system(opts)
 
     #
     print(conf)

@@ -173,4 +173,5 @@ def get_visual_words(opts, img, dictionary):
             distance = scipy.spatial.distance.cdist(all_response_oneImage[i, j, :].reshape(1, len(opts.filter_scales)*12), dictionary)
             closet = distance.argmin()
             wordmap[i, j] = closet
+
     return wordmap

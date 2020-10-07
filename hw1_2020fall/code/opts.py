@@ -25,7 +25,7 @@ def get_opts():
     parser.add_argument('--filter-scales', nargs='+', type=float,
                         default=[1, 2, 3],
                         help='a list of scales for all the filters')
-    parser.add_argument('--K', type=int, default=10,
+    parser.add_argument('--K', type=int, default=12,
                         help='# of words')
     parser.add_argument('--alpha', type=int, default=40,
                         help='Using only a subset of alpha pixels in each image') 

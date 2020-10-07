@@ -23,7 +23,7 @@ def get_feature_from_wordmap(opts, wordmap):
     K = opts.K
     # ----- TODO -----
     # print(np.histogram(wordmap)[0].shape)
-    result = np.histogram(wordmap, bins=[a for a in range(K + 1)])
+    result = np.histogram(wordmap, bins=[a for a in range(K + 1)], range=[0,K])
 
     # L1 Normalized
     return result[0] / result[0].sum()
@@ -57,7 +57,7 @@ def get_feature_from_wordmap_SPM(opts, wordmap):
     partition_height = height // pow(2, L)
 
     partition_result = []
-    partition_contented = np.empty((0, 10))
+    partition_contented = np.empty((0, K))
     # print(partition_contented.shape)
 
     for row in range(pow(2, L)):
@@ -189,11 +189,24 @@ def build_recognition_system(opts, n_worker=1):
     first_image_path = join(data_dir, train_files[0])
     len_features = get_image_feature(opts, first_image_path, dictionary).shape[0]
     features = np.zeros((0, len_features))
-    for each in train_files:
-        img_path = join(data_dir, each)
+    # for each in train_files:
+    #     img_path = join(data_dir, each)
+    #     feature = get_image_feature(opts, img_path, dictionary)
+    #     feature = feature.reshape(1, len_features)
+    #     features = np.concatenate((features, feature), axis=0)
+    global get_image_feature_one
+    def get_image_feature_one(image_path):
+        global features
+        img_path = join(data_dir, image_path)
         feature = get_image_feature(opts, img_path, dictionary)
         feature = feature.reshape(1, len_features)
         features = np.concatenate((features, feature), axis=0)
+        return
+
+    if __name__ == "__main__":
+        pool = multiprocessing.Pool(processes=n_worker)
+        print(type(train_files))
+        pool.map(get_image_feature_one, train_files)
 
     # Creating labels
     labels = train_labels
@@ -264,7 +277,28 @@ def evaluate_recognition_system(opts, n_worker=1):
     # Load the training data and the label
 
     count = 0
-    for one_test_path in test_files:
+    # for one_test_path in test_files:
+    #     test_image_path = join(data_dir, one_test_path)
+    #     features = get_image_feature(opts, test_image_path, dictionary)
+    #     # The distance between test image and each trained image
+    #     distance = distance_to_set(features, trained_system['features'])
+    #     # The shortest distance trained image
+    #     predict_type_position = np.argmin(distance)
+    #     # predicted result, which is a number from 0 to 7
+    #     predict_result = trained_system['labels'][predict_type_position]
+    #
+    #     # add it to the confusion matrix
+    #     j = predict_result
+    #     i = test_labels[count]
+    #     conf[i, j] += 1
+    #
+    #     if predict_result == test_labels[count]:
+    #         accuracy += 1
+    #     count += 1
+    global evaluate_one_image
+    def evaluate_one_image(one_test_path):
+        global count
+        global accuracy
         test_image_path = join(data_dir, one_test_path)
         features = get_image_feature(opts, test_image_path, dictionary)
         # The distance between test image and each trained image
@@ -278,17 +312,17 @@ def evaluate_recognition_system(opts, n_worker=1):
         j = predict_result
         i = test_labels[count]
         conf[i, j] += 1
-
         if predict_result == test_labels[count]:
             accuracy += 1
-        else:
-            print('###########')
-            print(test_image_path)
-            print(predict_result)
-            print(test_labels[count])
-            print('###########')
-
         count += 1
+
+    print(__name__)
+    # if __name__ == "__main__":
+    pool = multiprocessing.Pool(processes=n_worker)
+    res = pool.map(evaluate_one_image, test_files)
+    print(res)
+
+
     accuracy = accuracy / test_labels.shape[0]
 
     return [conf, accuracy]
