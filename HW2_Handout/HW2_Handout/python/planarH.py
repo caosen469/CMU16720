@@ -83,8 +83,31 @@ def computeH_ransac(locs1, locs2, opts):
     #Compute the best fitting homography given a list of matching points
     max_iters = opts.max_iters  # the number of iterations to run RANSAC for
     inlier_tol = opts.inlier_tol # the tolerance value for considering a point to be an inlier
+    #计算threshold
+    threshold = 6 * opts.sigma
     
-    # 
+    # 选出四个match。来计算homo
+    locs = np.append(locs1,locs2, axis=1)
+    np.random.shuffle(locs)
+    locs1 = locs[0:4,0:2]
+    locs2 = locs[0:4,2:4]
+    
+    # 计算出Homograph
+    H2to1 = computeH_norm(locs1, locs2)
+    
+    # 计算locs2 映射到locs1 上
+    padding = np.ones((locs2.shape[0],1))
+    locs2_1 = np.append(locs2, padding, axis=1)
+    locs2to1 = locs2_1 @ H2to1
+    locs2to1 = locs2to1[:,0:2]
+    
+    # 计算偏差
+    Bias = locs2to1 - locs1
+    # 计算片差距离
+    error_distance = np.linalg.norm(Bias, ord=2, axis=1)
+    # 统计inlier
+    index_inlier = np.where(error_distance<threshold)
+    
     return bestH2to1, inliers
 
 
