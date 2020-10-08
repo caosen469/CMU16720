@@ -35,7 +35,8 @@ def computeH_norm(x1, x2):
     # centroid1 = sum_x1 / length
     centroid1 = np.mean(x1, axis=0)
     print('for x1, the centroid is ', centroid1)
-    s1 = np.sqrt(2)/((1/length)*np.sum(np.sum((x1-centroid1)**2, axis=1)))
+    s1 = np.sqrt(2)/((1/length)*np.sum((np.sum((x1-centroid1)**2,axis=1))**(0.5)))
+
     t1_x = -s1 * centroid1[0]
     t1_y = -s1 * centroid1[1]
     print()
@@ -44,7 +45,7 @@ def computeH_norm(x1, x2):
     # sum_x2 = np.sum(x2, axis=0)
     centroid2 = np.mean(x2, axis=0)
     
-    s2 = np.sqrt(2)/((1/length)*np.sum(np.sqrt(np.sum((x2-centroid2)**2, axis=1))))
+    s2 = np.sqrt(2)/((1/length)*np.sum((np.sum((x2-centroid1)**2,axis=1))**(0.5)))
     t2_x = -s2 * centroid2[0]
     t2_y = -s2 * centroid2[1]
     
