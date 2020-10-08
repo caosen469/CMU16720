@@ -22,4 +22,4 @@ locs1 = locs1[matches[:,0],:]
 locs2 = locs2[matches[:,1],:]
 # plotMatches(img1, img2, matches, locs1, locs2)
 
-computeH_ransac(locs2, locs1, opts)
+result = computeH_ransac(locs2, locs1, opts)

@@ -1,7 +1,41 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Oct  8 08:11:36 2020
+
+@author: sihan
+"""
 import numpy as np
-import cv2
 
+# def computeH(x1, x2):
+#     #Q2.2.1
+#     #Compute the homography between two sets of points
+#     A = np.empty((0,9))
+#     for each in range(x1.shape[0]):
+#         row1 = np.array([[x2[each,0],x2[each, 1],1, 0, 0, 0,-x2[each,0]*x1[each,0], -x2[each,1]*x1[each,0],-x1[each, 0]]])
+#         A = np.append(A, row1, axis=0)
+#         row2 = np.array([[0,0,0,x2[each,0],x2[each,1],1, -x2[each,0]*x1[each,1],-x2[each,1]*x1[each,1],-x1[each,1]]])
+#         A = np.append(A, row2, axis=0)
+#     # print()
+#     # print('x1 is ', x1)
+#     # print()
+#     # print('x2 is ', x2)
+#     # print()
+#     # print('The value of A is', A)
 
+#     D, V = np.linalg.eig(A.T @ A)
+#     # print()
+#     # print('The eigen values is ', D)
+#     # print()
+#     # print('The eigen vector is ', V)
+#     # index = np.argwhere(D == 0)[0][0]
+#     index = np.argmin(np.abs(D))
+#     # index = np.argmin(D)
+    
+#     H2to1_vector = V[:, index]
+#     H2to1 = H2to1_vector.reshape((3,3))
+#     return H2to1
+
+#%%
 def computeH(x1, x2):
     #Q2.2.1
     #Compute the homography between two sets of points
@@ -34,8 +68,7 @@ def computeH(x1, x2):
     #%%
     H2to1 = H2to1_vector.reshape((3,3))
     return H2to1
-
-
+#%%
 def computeH_norm(x1, x2):
     #Q2.2.2
     
@@ -100,20 +133,21 @@ def computeH_norm(x1, x2):
     # print('T1^-1 is', np.linalg.inv(T1))
     # print()
     H2to1 = np.linalg.inv(T1) @ H2to1 @ T2
+    print()
+    print('T2 shape is ', T2.shape)
     #Denormalization
     # print('H2to1 is ', H2to1)
     return H2to1 
-
 #%%
 
-def computeH_ransac(locs1, locs2, opts):
+def computeH_ransac(locs1, locs2, max_iters=1000, inlier_tol=3):
     """
     locs1 and locs2 are coordinates that retrived from matches
     """
     #Q2.2.3
     #Compute the best fitting homography given a list of matching points
-    max_iters = opts.max_iters  # the number of iterations to run RANSAC for
-    inlier_tol = opts.inlier_tol # the tolerance value for considering a point to be an inlier
+    max_iters = max_iters  # the number of iterations to run RANSAC for
+    inlier_tol = inlier_tol # the tolerance value for considering a point to be an inlier
     #定义一个current inliner
     # print()
     # print('input locs1 is ', locs1)
@@ -174,26 +208,9 @@ def computeH_ransac(locs1, locs2, opts):
     return bestH2to1, inliers
 
 #%%
-# def compositeH(H2to1, template, img):
+# x1 = np.array([[1.21, 1.3],[-0.3,-1.04],[-1.7,0.4],[0.8, 0.6]])
+# x2 = np.array([[1.21, 1.3],[-0.3,-1.04],[-1.7,0.4],[0.8, 0.6]])
+x1 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
+x2 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
 
-#     #Create a composite image after warping the template image on top
-#     #of the image using the homography
-
-#     #Note that the homography we compute is from the image to the template;
-#     #x_template = H2to1*x_photo
-#     #For warping the template to the image, we need to invert it.
-    
-
-#     #Create mask of same size as template
-
-#     #Warp mask by appropriate homography
-
-#     #Warp template by appropriate homography
-
-#     #Use mask to combine the warped template and the image
-    
-#     return composite_img
-
-# [240, 163],
-# plotMatches(img,img_rotate,matches, locs1, locs2)
-# cv2.circle(img,(locs1[240,:][0],locs1[240,:][1]),5,(0,0,0),4)
+H2to1 = computeH_ransac(x1, x2,max_iters=2000)
