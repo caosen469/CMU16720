@@ -13,9 +13,9 @@ def get_opts():
     parser = argparse.ArgumentParser(description='16-720 HW2: Homography')
 
     ## Feature detection (requires tuning)
-    parser.add_argument('--sigma', type=float, default=0.4,
+    parser.add_argument('--sigma', type=float, default=0.15,
                         help='threshold for corner detection using FAST feature detector')
-    parser.add_argument('--ratio', type=float, default=0.7,
+    parser.add_argument('--ratio', type=float, default=0.6,
                         help='ratio for BRIEF feature descriptor')
 
     ## Ransac (requires tuning)

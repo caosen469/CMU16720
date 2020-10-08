@@ -21,6 +21,7 @@ def matchPics(I1, I2, opts):
 
     #%%
     #Detect Features in Both Images
+    # print('Here is good')
     locs1 = corner_detection(I1, sigma)
     locs2 = corner_detection(I2, sigma)
     
@@ -29,9 +30,13 @@ def matchPics(I1, I2, opts):
     #Obtain descriptors for the computed feature locations
     
     desc1, locs1 = computeBrief(I1, locs1)
-    desc2, locs2 = computeBrief(I1, locs2)
+    desc2, locs2 = computeBrief(I2, locs2)
 
     #Match features using the descriptors
     matches = briefMatch(desc1, desc2, ratio)
+    
+    # Change the locs to the corresponding1
+    # locs1 = locs1[matches[:,0],:]
+    # locs2 = locs2[matches[:,1],:]
     #%%
     return matches, locs1, locs2
