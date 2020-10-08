@@ -116,20 +116,31 @@ def computeH_ransac(locs1, locs2, opts):
         # 计算出Homograph
         #%% 目前问题在这里
         H2to1 = computeH_norm(locs1, locs2)
+        print()
+        print('The H computation so far is ', H2to1)
         #%%
         # print(H2to1)
         # 计算locs2 映射到locs1 上
         padding = np.ones((locs2.shape[0],1))
         locs2_1 = np.append(locs2, padding, axis=1)
-        locs2to1 = locs2_1 @ H2to1
-        locs2to1 = locs2to1[:,0:2]
-        
+        locs2to1 = H2to1 @ locs2_1.T 
+        print()
+        print('locs2 is ', locs2)
+        print()
+        print('The result for locs2 to 1 is', locs2to1)
+        locs2to1 = locs2to1.T[:,0:2]
+        print()
+        print('The result for locs2 to 1 is', locs2to1)
+        print()
+        print('locs1 is ', locs1)
         # 计算偏差
         Bias = locs2to1 - locs1
         # 计算片差距离
         error_distance = np.linalg.norm(Bias, ord=2, axis=1)
         # 统计inlier
         index_inlier = np.where(error_distance<inlier_tol)
+        print()
+        print('index_inlier is ', index_inlier)
         # print(error_distance)
         # print(index_inlier)
         # 如果index_inlier的个数多余current inlier，则更新
