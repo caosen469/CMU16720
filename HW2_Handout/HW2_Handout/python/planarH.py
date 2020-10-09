@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+import numpy.matlib
 
 def computeH(x1, x2):
     #Q2.2.1
@@ -93,12 +93,16 @@ def computeH_ransac(locs1, locs2, opts):
     bestH2to1 = np.zeros((3,3))
     for each in range(max_iters):
     # for each in range(1):
+        
     # 选出四个match。来计算homo
-        locs = np.append(locs1,locs2, axis=1)
-        np.random.shuffle(locs)
-        locs_1 = locs[0:4,0:2]
-        locs_2 = locs[0:4,2:4]
-      
+        # locs = np.append(locs1,locs2, axis=1)
+        # np.random.shuffle(locs)
+        # locs_1 = locs[0:4,0:2]
+        # locs_2 = locs[0:4,2:4]
+        
+        randomIndex = np.random.choice(locs1.shape[0],4,replace=False)
+        locs_1 = locs1[randomIndex, :]
+        locs_2 = locs2[randomIndex, :]
         #%% 目前问题在这里
         H2to1 = computeH_norm(locs_1, locs_2)
         # print()
@@ -109,14 +113,15 @@ def computeH_ransac(locs1, locs2, opts):
         padding = np.ones((locs2.shape[0],1))
         locs2_1 = np.append(locs2, padding, axis=1)
         locs2to1 = H2to1 @ locs2_1.T 
-   
-        locs2to1 = locs2to1.T[:,0:2]
-        
-        Bias = locs2to1 - locs1
+        L = np.matlib.repmat(locs2to1[2,:],2,1)
+        locs2to1 = np.divide(locs2to1[0:2,:],L)
+        locs2to1 = locs2to1.T
+        error_distance = np.linalg.norm(locs2to1 - locs1)
+        # Bias = locs2to1 - locs1
         # 计算片差距离
-        error_distance = np.linalg.norm(Bias, ord=2, axis=1)
-        # print()
-        # print('error distance is', error_distance)
+        # error_distance = np.linalg.norm(Bias, ord=2, axis=1)
+        print()
+        print('error distance is', error_distance)
         # 统计inlier
         index_inlier = np.where(error_distance<inlier_tol)
      

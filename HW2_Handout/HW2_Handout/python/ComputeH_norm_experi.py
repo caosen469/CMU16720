@@ -81,7 +81,8 @@ def computeH_norm(x1, x2):
     # print('k is', k)
     tx_1 = -k * centroid1[0]
     ty_1 = -k * centroid1[1]
-    
+    print()
+    print('x1 is', x1)
     T1 = np.array([[k,0,tx_1],[0,k,ty_1],[0,0,1]])
     # print(T1)
     padding = np.ones((x1.shape[0],1))
@@ -92,11 +93,11 @@ def computeH_norm(x1, x2):
     
     
     centroid2 = np.mean(x2, axis=0)
-    print('centroid2 is ', centroid2)
+    # print('centroid2 is ', centroid2)
     x2_translation = x2 - centroid2
     distance_from_origin = np.sum(x2_translation**2, axis=1)
     max_distance = np.sqrt(np.max(distance_from_origin))
-    print('max distance is ', max_distance)
+    # print('max distance is ', max_distance)
     k = np.sqrt(2)/max_distance
     
     tx_2 = -k * centroid2[0]
@@ -104,9 +105,9 @@ def computeH_norm(x1, x2):
     
     T2 = np.array([[k,0,tx_2],[0,k,ty_2],[0,0,1]])
     print()
-    print('T1 is',T1)
+    # print('T1 is',T1)
     print()
-    print('T2 is',T2)
+    # print('T2 is',T2)
     padding = np.ones((x2.shape[0],1))
     x2 = np.append(x2, padding, axis=1)
     x2 = T2 @ x2.T
@@ -116,7 +117,7 @@ def computeH_norm(x1, x2):
     x1_input = x1
     x2_input = x2
     print('x1 input for H computation is ', x1_input)
-    print('x2 input for H computation is ', x2_input)
+    # print('x2 input for H computation is ', x2_input)
     # print('x2 input for H computation is ', x2_input)
     # print()
     #Similarity transform 2
