@@ -5,7 +5,7 @@ Created on Thu Oct  8 08:11:36 2020
 @author: sihan
 """
 import numpy as np
-
+import cv2
 # def computeH(x1, x2):
 #     #Q2.2.1
 #     #Compute the homography between two sets of points
@@ -38,13 +38,44 @@ import numpy as np
 #%%
 def computeH(x1, x2):
     #Q2.2.1
-    #Compute the homography between two sets of points
+    # Compute the homography between two sets of points
     A = np.empty((0,9))
     for each in range(x1.shape[0]):
         row1 = np.array([[x2[each,0],x2[each, 1],1, 0, 0, 0,-x2[each,0]*x1[each,0], -x2[each,1]*x1[each,0],-x1[each, 0]]])
         A = np.append(A, row1, axis=0)
         row2 = np.array([[0,0,0,x2[each,0],x2[each,1],1, -x2[each,0]*x1[each,1],-x2[each,1]*x1[each,1],-x1[each,1]]])
         A = np.append(A, row2, axis=0)
+    #%%
+    # N = x1.shape[1]
+    # p1 = x1.T
+    # p2=x2.T
+    # A = np.zeros((2*N,9),dtype=int)
+    # #print(A)
+    # for i in range(N):
+    #     x = p1[0,i]
+    #     y = p1[1,i]
+    #     u = p2[0,i]
+    #     v = p2[1,i]
+    #     #print(i)
+    #     # odd - x rows
+    #     A[(i*2)+1,:] = [ -u, -v, -1,  0, 0, 0,  x*u, x*v, x]
+    #     #print(A)
+    #     #even - y rows
+    #     A[(i*2),:] = [ 0, 0, 0, -u, -v, -1, y*u,  y*v, y]
+        #print(A)
+
+    #%%
+    
+    # N = x1.shape[0]
+    # A = np.zeros((2*N, 9))
+    # for i in range(N):
+    #     x = x2[i, 0]
+    #     y = x2[i, 1]
+    #     u = x1[i, 0]
+    #     v = x1[i, 1]
+    #     A[(i*2)+1,:]=[x,y,1,0,0,0,-x*u,-y*u,-u]
+    #     A[(i*2),:]=[0,0,0,x,y,1,-x*v,-y*v,-v]
+
     # print()
     # print('x1 is ', x1)
     # print()
@@ -63,11 +94,57 @@ def computeH(x1, x2):
     
     # H2to1_vector = V[:, index]
     #%%
-    [U,S,V] = np.linalg.svd(A.T@A)
-    H2to1_vector = V[:,8]
+    # [U,S,V] = np.linalg.svd(A.T@A)
+    # H2to1_vector = V.T[:,8]
     #%%
-    H2to1 = H2to1_vector.reshape((3,3))
+    # u,s,v = np.linalg.svd(A)
+    # #print(A)
+    # #w,v = np.linalg.eigh(np.matmul(np.transpose(A), A))
+    # #H2to1 = v[:,0].reshape(3,3)
+    # H2to1 = (v[-1,:]/v[-1,-1]).reshape(3,3)
+    # #H2to1 = np.transpose(v[:,0].reshape(3,3))
+    #%%    
+    V = np.dot(A.T, A)
+    eigen_values, eigen_vecs = np.linalg.eigh(V)
+    squeezed_H = eigen_vecs[:, 0]
+    H2to1 = squeezed_H.reshape(3, 3)
+    #%%
+    # H2to1 = H2to1_vector.reshape((3,3))
     return H2to1
+
+# def computeH(x1, x2):
+#     '''
+#     INPUTS:
+#         p1 and p2 - Each are size (2 x N) matrices of corresponding (x, y)'  
+#                  coordinates between two images
+#     OUTPUTS:
+#      H2to1 - a 3 x 3 matrix encoding the homography that best matches the linear 
+#             equation
+#     '''
+#     p1 = x1.T
+#     p2 = x2.T
+#     assert(p1.shape[1] == p2.shape[1])
+#     assert(p1.shape[0] == 2)
+    
+#     num_points = p1.shape[1]
+#     A = np.zeros((2 * num_points, 9))
+#     A[np.array(
+#         [row for row in range(2 * num_points) if row % 2 == 0]
+#     ), 0:3] = np.hstack((p2.T, np.ones((num_points, 1))))
+#     A[np.array(
+#         [row for row in range(2 * num_points) if row % 2 == 1]
+#     ), 3:6] = np.hstack((p2.T, np.ones((num_points, 1))))
+#     A[np.array(
+#         [row for row in range(2 * num_points) if row % 2 == 0]
+#     ), 6:9] = -np.hstack((p2.T, np.ones((num_points, 1)))) * p1.T[:, 0].reshape(-1, 1)
+#     A[np.array(
+#         [row for row in range(2 * num_points) if row % 2 == 1]
+#     ), 6:9] = -np.hstack((p2.T, np.ones((num_points, 1)))) * p1.T[:, 1].reshape(-1, 1)
+#     V = np.dot(A.T, A)
+#     eigen_values, eigen_vecs = np.linalg.eigh(V)
+#     squeezed_H = eigen_vecs[:, 0]
+#     H2to1 = squeezed_H.reshape(3, 3)
+#     return H2to1
 #%%
 def computeH_norm(x1, x2):
     #Q2.2.2
@@ -91,7 +168,7 @@ def computeH_norm(x1, x2):
     # sum_x2 = np.sum(x2, axis=0)
     centroid2 = np.mean(x2, axis=0)
     
-    s2 = np.sqrt(2)/((1/length)*np.sum((np.sum((x2-centroid1)**2,axis=1))**(0.5)))
+    s2 = np.sqrt()/((1/length)*np.sum((np.sum((x2-centroid1)**2,axis=1))**(0.5)))
     t2_x = -s2 * centroid2[0]
     t2_y = -s2 * centroid2[1]
     
@@ -192,7 +269,8 @@ def computeH_ransac(locs1, locs2, max_iters=1000, inlier_tol=3):
         # 计算偏差
         Bias = locs2to1 - locs1
         # 计算片差距离
-        error_distance = np.linalg.norm(Bias, ord=2, axis=1)
+        # error_distance = np.linalg.norm(Bias, ord=2, axis=1)
+        error_distance = np.sqrt(np.sum(Bias**2,axis=1))
         print()
         print('error distance is', error_distance)
         # 统计inlier
@@ -210,7 +288,26 @@ def computeH_ransac(locs1, locs2, max_iters=1000, inlier_tol=3):
 #%%
 # x1 = np.array([[1.21, 1.3],[-0.3,-1.04],[-1.7,0.4],[0.8, 0.6]])
 # x2 = np.array([[1.21, 1.3],[-0.3,-1.04],[-1.7,0.4],[0.8, 0.6]])
-x1 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
-x2 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
+# x1 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
+# x2 = np.array([[2, 2],[3,3],[4,4],[5, 5],[6,6]])
+x = np.arange(1,5,1)
+y = np.arange(1,5,1)
+x1 = np.column_stack((x,y))
+x2 = x1
 
-H2to1 = computeH_ransac(x1, x2,max_iters=2000)
+H2to1_1 = computeH(x1,x2)
+#%%
+x1 = x1.astype(np.float32)
+x2 = x2.astype(np.float32)
+
+H2to1_2 = cv2.getPerspectiveTransform(x1, x2)
+#%%
+A = np.empty((0,9))
+for each in range(x1.shape[0]):
+    row1 = np.array([[x2[each,0],x2[each, 1],1, 0, 0, 0,-x2[each,0]*x1[each,0], -x2[each,1]*x1[each,0],-x1[each, 0]]])
+    A = np.append(A, row1, axis=0)
+    row2 = np.array([[0,0,0,x2[each,0],x2[each,1],1, -x2[each,0]*x1[each,1],-x2[each,1]*x1[each,1],-x1[each,1]]])
+    A = np.append(A, row2, axis=0)
+#%%
+H2to1_3 = computeH_norm(x1,x2)
+

@@ -15,7 +15,7 @@ def get_opts():
     ## Feature detection (requires tuning)
     parser.add_argument('--sigma', type=float, default=0.15,
                         help='threshold for corner detection using FAST feature detector')
-    parser.add_argument('--ratio', type=float, default=0.6,
+    parser.add_argument('--ratio', type=float, default=0.8,
                         help='ratio for BRIEF feature descriptor')
 
     ## Ransac (requires tuning)
