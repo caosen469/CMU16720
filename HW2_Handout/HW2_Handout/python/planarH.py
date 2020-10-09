@@ -91,8 +91,11 @@ def computeH_ransac(locs1, locs2, opts):
     current_inlier = 0
     inliers = np.zeros((locs1.shape[0],1))
     bestH2to1 = np.zeros((3,3))
-    for each in range(max_iters):
-    # for each in range(1):
+    
+    num_inlier = np.zeros(max_iters)
+    H_record = [None] * max_iters
+    for i in range(max_iters):
+    # for i in range(1):
         
     # 选出四个match。来计算homo
         # locs = np.append(locs1,locs2, axis=1)
@@ -116,19 +119,36 @@ def computeH_ransac(locs1, locs2, opts):
         L = np.matlib.repmat(locs2to1[2,:],2,1)
         locs2to1 = np.divide(locs2to1[0:2,:],L)
         locs2to1 = locs2to1.T
+        
+        # 计算误差
+        tempInliersNum = 0
+        for j in range(locs1.shape[0]):
+            currDist = np.linalg.norm(locs2to1[j,:]-locs1[j,:])
+            print()
+            print(currDist)
+            
+            if currDist < inlier_tol:
+                tempInliersNum += 1
+        
+        num_inlier[i] = tempInliersNum
+        H_record[i] = H2to1
+        
         error_distance = np.linalg.norm(locs2to1 - locs1)
         # Bias = locs2to1 - locs1
         # 计算片差距离
         # error_distance = np.linalg.norm(Bias, ord=2, axis=1)
-        print()
-        print('error distance is', error_distance)
+        # print()
+        # print('error distance is', error_distance)
         # 统计inlier
-        index_inlier = np.where(error_distance<inlier_tol)
+        # index_inlier = np.where(error_distance<inlier_tol)
      
-        if index_inlier[0].shape[0]>current_inlier:
-             inliers = index_inlier
-             bestH2to1 = H2to1
-    return bestH2to1, inliers
+    maxInliers = num_inlier.max()
+    bestH2to1 = H_record[np.argmax(num_inlier)]
+
+        # if index_inlier[0].shape[0]>current_inlier:
+        #      inliers = index_inlier
+        #      bestH2to1 = H2to1
+    return bestH2to1, maxInliers
 
 #%%
 def compositeH(H2to1, template, img):
