@@ -5,87 +5,40 @@ import cv2
 def computeH(x1, x2):
     #Q2.2.1
     #Compute the homography between two sets of points
-    # A = np.empty((0,9))
-    # for each in range(x1.shape[0]):
-    #     row1 = np.array([[x2[each,0],x2[each, 1],1, 0, 0, 0,-x2[each,0]*x1[each,0], -x2[each,1]*x1[each,0],-x1[each, 0]]])
-    #     A = np.append(A, row1, axis=0)
-    #     row2 = np.array([[0,0,0,x2[each,0],x2[each,1],1, -x2[each,0]*x1[each,1],-x2[each,1]*x1[each,1],-x1[each,1]]])
-    #     A = np.append(A, row2, axis=0)
-    # print()
-    # print('x1 is ', x1)
-    # print()
-    # print('x2 is ', x2)
-    # print()
-    # print('The value of A is', A)
-    
-    #%%
-    N = x1.shape[0]
-    A = np.zeros((2*N,9))
-    for i in range(x1.shape[0]):
-        x = x2[i,0]
-        y = x2[i,1]
-        u = x1[i,0]
-        v = x1[i,1]
-        
-        A[i*2,:] = np.array([[x,y,1,0,0,0,-x*u,-y*u,-u]])
-        A[i*2+1,:] = np.array([[0,0,0,x,y,1,-x*v,-y*v,-v]])
-        #%%
-    # D, V = np.linalg.eig(A.T @ A)
-    # print()
-    # print('The eigen values is ', D)
-    # print()
-    # print('The eigen vector is ', V)
-    # # index = np.argwhere(D == 0)[0][0]
-    # # index = np.argmin(np.abs(D))
-    # index = np.argmin(D)
-    
-    # H2to1_vector = V[:, index]
-    
-    #%%
-    V = np.dot(A.T, A)
-    eigen_values, eigen_vecs = np.linalg.eigh(V)
-    squeezed_H = eigen_vecs[:, 0]
-    H2to1 = squeezed_H.reshape(3, 3)
-    # return H2to1
-    # #%%
-    # [U,S,V] = np.linalg.svd(A.T@A)
-    # H2to1_vector = V[:,8]
-    #%%
-    x1 = x1.astype(np.float32)
-    x2 = x2.astype(np.float32)
+    x1 = x1.T
+    x2 = x2.T
+    N = x1.shape[1]
+    x1 = np.vstack((x1,np.ones(N,dtype=int)))
+    x2 = np.vstack((x2,np.ones(N,dtype=int)))
 
-    H2to1 = cv2.getPerspectiveTransform(x1, x2)
-    #%%
-    # H2to1 = H2to1_vector.reshape((3,3))
+    A = np.zeros((2*N,9),dtype=int)
+    #print(A)
+    for i in range(N):
+        x = x1[0,i]
+        y = x1[1,i]
+        u = x2[0,i]
+        v = x2[1,i]
+
+        A[(i*2)+1,:] = [ -u, -v, -1,  0, 0, 0,  x*u, x*v, x]
+   
+        A[(i*2),:] = [ 0, 0, 0, -u, -v, -1, y*u,  y*v, y]
+   
+    u,s,v = np.linalg.svd(A)
+    
+    H2to1 = (v[-1,:]/v[-1,-1]).reshape(3,3)
+    print('H2to1 is ', H2to1)
+   
     return H2to1
-
-
-
 
 #%%
 def computeH_norm(x1, x2):
     #Q2.2.2
     #%%
-    # Translate to the mean
-    # centroid1 = np.mean(x1, axis=0)
-    
-    # x1 = x1 - centroid1
-    # distance_from_origin = np.sum(x1**2, axis=1)
-    # max_distance = np.sqrt(np.max(distance_from_origin))
-    # x1 = x1/max_distance*np.sqrt(2)
-    
-    # centroid2 = np.mean(x2, axis=0)
-    
-    # x2 = x2 - centroid2
-    # distance_from_origin = np.sum(x2**2, axis=1)
-    # max_distance = np.sqrt(np.max(distance_from_origin))
-    # x2 = x2/max_distance*np.sqrt(2)
-    #%%
     centroid1 = np.mean(x1, axis=0)
     x1_translation = x1 - centroid1
     distance_from_origin = np.sum(x1_translation**2, axis=1)
     max_distance = np.sqrt(np.max(distance_from_origin))
-    k = np.sqrt(1)/max_distance
+    k = np.sqrt(2)/max_distance
     
     tx_1 = -k * centroid1[0]
     ty_1 = -k * centroid1[1]
@@ -97,16 +50,14 @@ def computeH_norm(x1, x2):
     x1 = T1 @ x1.T
     x1 = x1.T[:,0:2]
     
-    
-    
     centroid2 = np.mean(x2, axis=0)
     x2_translation = x2 - centroid2
     distance_from_origin = np.sum(x2_translation**2, axis=1)
     max_distance = np.sqrt(np.max(distance_from_origin))
-    k = np.sqrt(1)/max_distance
+    k = np.sqrt(2)/max_distance
     
-    tx_2 = -k * centroid1[0]
-    ty_2 = -k * centroid1[1]
+    tx_2 = -k * centroid2[0]
+    ty_2 = -k * centroid2[1]
     
     T2 = np.array([[k,0,tx_2],[0,k,ty_2],[0,0,1]])
     # print(T1)
@@ -114,75 +65,16 @@ def computeH_norm(x1, x2):
     x2 = np.append(x2, padding, axis=1)
     x2 = T2 @ x2.T
     x2 = x2.T[:,0:2]
-    
-    #%%
-    # #%%
-    # #Compute the centroid of the points
-    # # print('x1 is', x1)
-    # # print('x2 is', x2)
-    # length = x1.shape[0]
-    # # sum_x1 = np.sum(x1, axis=0) 
-    # # centroid1 = sum_x1 / length
-    # centroid1 = np.mean(x1, axis=0)
-    # # print('for x1, the centroid is ', centroid1)
-    # s1 = np.sqrt(2)/((1/length)*np.sum((np.sum((x1-centroid1)**2,axis=1))**(0.5)))
-
-    # t1_x = -s1 * centroid1[0]
-    # t1_y = -s1 * centroid1[1]
-    # # print()
-    # # print('s1 is', s1)
-    
-    # # sum_x2 = np.sum(x2, axis=0)
-    # centroid2 = np.mean(x2, axis=0)
-    
-    # s2 = np.sqrt(2)/((1/length)*np.sum((np.sum((x2-centroid1)**2,axis=1))**(0.5)))
-    # t2_x = -s2 * centroid2[0]
-    # t2_y = -s2 * centroid2[1]
-    
-    # #%%
-    
-    # T1 = np.array([[s1,0,t1_x],[0,s1,t1_y],[0,0,1]])
-    # # print('T1 transformation is ', T1)
-    # T2 = np.array([[s2,0,t2_x],[0,s2,t2_y],[0,0,1]])
-    # # print('T2 transformation is ', T2)
-
-
-  
-    # # turn x1, x2 to homogeneous coordinate
-    # padding1 = np.ones((x1.shape[0],1))
-    # padding2 = np.ones((x2.shape[0],1))
-    # x1_homo = np.append(x1, padding1, axis=1)
-    # x2_homo = np.append(x2, padding2, axis=1)
-    # # print('x1 Homogeneous coordinate is ', x1_homo)
-    # # print('x2 Homogeneous coordinate is ', x2_homo)
-
-    # x1_norm_homo = T1 @ x1_homo.T # 3 * N
-    # x2_norm_homo = T2 @ x2_homo.T # 3 * N
-    # # print()
-    # # print('x1 normalized homogeneous coordinate is', x1_norm_homo)
-    # # print('x2 normalized homogeneous coordinate is', x2_norm_homo)
-    print()
-    #%%  
-    #Similarity transform 1
-    # x1_input = x1_norm_homo.T[:, 0:2]
-    # x2_input = x2_norm_homo.T[:, 0:2]
     x1_input = x1
     x2_input = x2
-    print('x1 input for H computation is ', x1_input)
-    # print('x2 input for H computation is ', x2_input)
-    # print()
+  
     #Similarity transform 2
     #%%
     H2to1 = computeH(x1_input, x2_input)
-    # print()
-    # print('H2to1 is', H2to1)
-    #Compute homography
-    # print()
-    # print('T1^-1 is', np.linalg.inv(T1))
-    # print()
     H2to1 = np.linalg.inv(T1) @ H2to1 @ T2
     #Denormalization
-    # print('H2to1 is ', H2to1)
+    print()
+    print('H2to1 is ', H2to1)
     return H2to1 
 
 #%%
@@ -194,14 +86,8 @@ def computeH_ransac(locs1, locs2, opts):
     #Q2.2.3
     #Compute the best fitting homography given a list of matching points
     max_iters = opts.max_iters  # the number of iterations to run RANSAC for
-    inlier_tol = 200 # the tolerance value for considering a point to be an inlier
-    #定义一个current inliner
-    # print()
-    # print('input locs1 is ', locs1)
-    # print()
-    # print('input locs2 is ', locs2)
-    # print()
-    # print('input locs2 shape is  ', locs2.shape)
+    # inlier_tol = opts.inlier_tol # the tolerance value for considering 
+    inlier_tol=10
     current_inlier = 0
     inliers = np.zeros((locs1.shape[0],1))
     bestH2to1 = np.zeros((3,3))
@@ -212,11 +98,7 @@ def computeH_ransac(locs1, locs2, opts):
         np.random.shuffle(locs)
         locs_1 = locs[0:4,0:2]
         locs_2 = locs[0:4,2:4]
-        print()
-        print('locs_1 is ', locs_1)
-        # print()
-        # print('locs_2 is ', locs_2)
-        # 计算出Homograph
+      
         #%% 目前问题在这里
         H2to1 = computeH_norm(locs_1, locs_2)
         # print()
@@ -227,28 +109,17 @@ def computeH_ransac(locs1, locs2, opts):
         padding = np.ones((locs2.shape[0],1))
         locs2_1 = np.append(locs2, padding, axis=1)
         locs2to1 = H2to1 @ locs2_1.T 
-        # print()
-        # print('locs2 is ', locs_2)
-        # print()
-        # print('The result for locs2 to 1 is', locs2to1)
+   
         locs2to1 = locs2to1.T[:,0:2]
-        # print()
-        # print('The result for locs2 to 1 is', locs2to1)
-        # print()
-        # print('locs1 is ', locs_1)
-        # 计算偏差
+        
         Bias = locs2to1 - locs1
         # 计算片差距离
         error_distance = np.linalg.norm(Bias, ord=2, axis=1)
-        print()
-        print('error distance is', error_distance)
+        # print()
+        # print('error distance is', error_distance)
         # 统计inlier
         index_inlier = np.where(error_distance<inlier_tol)
-        # print()
-        # print('index_inlier is ', index_inlier)
-        # print(error_distance)
-        # print(index_inlier)
-        # 如果index_inlier的个数多余current inlier，则更新
+     
         if index_inlier[0].shape[0]>current_inlier:
              inliers = index_inlier
              bestH2to1 = H2to1

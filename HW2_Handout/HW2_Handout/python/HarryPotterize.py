@@ -8,7 +8,8 @@ from opts import get_opts
 from matchPics import matchPics
 from planarH import computeH_ransac
 from helper import plotMatches
-
+np.set_printoptions(precision=3)
+np.set_printoptions(suppress=True)
 #Write script for Q2.2.4
 opts = get_opts()
 
