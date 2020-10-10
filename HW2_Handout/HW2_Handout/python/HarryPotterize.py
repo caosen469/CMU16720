@@ -14,13 +14,13 @@ np.set_printoptions(suppress=True)
 opts = get_opts()
 
 # Read cv_cover.jpg, cv_desk.png and hp_cover.jpg
-img1 = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\cv_cover.jpg',1)
-img2 = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\cv_desk.png',1)
-img3 = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\hp_cover.jpg',1)
+cv_cover = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\cv_cover.jpg',1)
+cv_desk = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\cv_desk.png',1)
+hp_desk = cv2.imread('D:/Academic/CMU/Course/2020Fall/CV/Homework/HW2_Handout/HW2_Handout/data\hp_cover.jpg',1)
 
 #%%
-matches, locs1, locs2 = matchPics(img1,img1, opts)
-# plotMatches(img1, img2, matches, locs1, locs2)
+matches, locs1, locs2 = matchPics(cv_desk,cv_cover, opts)
+# plotMatches(cv_desk, cv_cover, matches, locs1, locs2)
 
 locs1 = locs1[matches[:,0],:]
 locs1[:,[0,1]] = locs1[:,[1,0]]
@@ -28,9 +28,12 @@ locs1[:,[0,1]] = locs1[:,[1,0]]
 locs2 = locs2[matches[:,1],:]
 locs2[:,[0,1]] = locs2[:,[1,0]]
 
-result = computeH_ransac(locs2, locs1, opts)
-H1 = result[0]
+result = computeH_ransac(locs1, locs2, opts)
+H1 = result[0]  
+# H1 = np.linalg.inv(H1)
 
+new_img = cv2.warpPerspective(cv_cover, H1,(cv_desk.shape[1],cv_desk.shape[0]))
+cv2.imshow('1', new_img)
 # #%%
 # matches, locs1, locs3 = matchPics(img1,img3, opts)
 # # plotMatches(img1, img3, matches, locs1, locs3)

@@ -24,10 +24,11 @@ def computeH(x1, x2):
         A[(i*2),:] = [ 0, 0, 0, -u, -v, -1, y*u,  y*v, y]
    
     u,s,v = np.linalg.svd(A)
-    
-    H2to1 = (v[-1,:]/v[-1,-1]).reshape(3,3)
+    # print()
+    # print('v -1 -1 is', v[-1,-1])
+    H2to1 = (v[-1,:]/(v[-1,-1]+0.000000001)).reshape(3,3)
+    # H2to1 = cv2.findHomography(x1, x2)
     print('H2to1 is ', H2to1)
-   
     return H2to1
 
 #%%
@@ -73,8 +74,8 @@ def computeH_norm(x1, x2):
     H2to1 = computeH(x1_input, x2_input)
     H2to1 = np.linalg.inv(T1) @ H2to1 @ T2
     #Denormalization
-    print()
-    print('H2to1 is ', H2to1)
+    # print()
+    # print('H2to1 is ', H2to1)
     return H2to1 
 
 #%%
@@ -86,16 +87,19 @@ def computeH_ransac(locs1, locs2, opts):
     #Q2.2.3
     #Compute the best fitting homography given a list of matching points
     max_iters = opts.max_iters  # the number of iterations to run RANSAC for
-    # inlier_tol = opts.inlier_tol # the tolerance value for considering 
-    inlier_tol=10
-    current_inlier = 0
+    inlier_tol = opts.inlier_tol # the tolerance value for considering 
+    # inlier_tol=10
+    
     inliers = np.zeros((locs1.shape[0],1))
     bestH2to1 = np.zeros((3,3))
+    inliers_record = np.empty((locs1.shape[0],0))
+    distance_record = np.empty((locs1.shape[0],0))
+
     
     num_inlier = np.zeros(max_iters)
     H_record = [None] * max_iters
-    for i in range(max_iters):
-    # for i in range(1):
+    # for i in range(max_iters):
+    for i in range(1):
         
     # 选出四个match。来计算homo
         # locs = np.append(locs1,locs2, axis=1)
@@ -103,7 +107,8 @@ def computeH_ransac(locs1, locs2, opts):
         # locs_1 = locs[0:4,0:2]
         # locs_2 = locs[0:4,2:4]
         
-        randomIndex = np.random.choice(locs1.shape[0],4,replace=False)
+        # randomIndex = np.random.choice(locs1.shape[0],4,replace=False)
+        randomIndex = np.array([0,1,2,3])
         locs_1 = locs1[randomIndex, :]
         locs_2 = locs2[randomIndex, :]
         #%% 目前问题在这里
@@ -117,23 +122,32 @@ def computeH_ransac(locs1, locs2, opts):
         locs2_1 = np.append(locs2, padding, axis=1)
         locs2to1 = H2to1 @ locs2_1.T 
         L = np.matlib.repmat(locs2to1[2,:],2,1)
-        locs2to1 = np.divide(locs2to1[0:2,:],L)
+        
+        locs2to1 = np.divide(locs2to1[0:2,:],L+0.0000001)
         locs2to1 = locs2to1.T
         
         # 计算误差
-        tempInliersNum = 0
-        for j in range(locs1.shape[0]):
-            currDist = np.linalg.norm(locs2to1[j,:]-locs1[j,:])
-            print()
-            print(currDist)
-            
-            if currDist < inlier_tol:
-                tempInliersNum += 1
         
+        # for j in range(locs1.shape[0]):
+        #     currDist = np.linalg.norm(locs2to1[j,:]-locs1[j,:])
+        #     print()
+        #     print(currDist)
+            
+        #     if currDist < inlier_tol:
+        #         tempInliersNum += 1
+        
+        currDist = np.linalg.norm(locs2to1-locs1,axis=1)
+        distance_record = np.append(distance_record, currDist.reshape((locs1.shape[0],1)), axis=1)
+        Curr_inliers = currDist < inlier_tol 
+        
+        tempInliersNum = np.count_nonzero(Curr_inliers,axis=0)
         num_inlier[i] = tempInliersNum
+        # if i>0 and num_inlier[i] > num_inlier[i-1]:
+        #     inliers = Curr_inliers
+        inliers_record = np.append(inliers_record, Curr_inliers.reshape((locs1.shape[0],1)), axis=1)
         H_record[i] = H2to1
         
-        error_distance = np.linalg.norm(locs2to1 - locs1)
+        # error_distance = np.linalg.norm(locs2to1 - locs1)
         # Bias = locs2to1 - locs1
         # 计算片差距离
         # error_distance = np.linalg.norm(Bias, ord=2, axis=1)
@@ -144,11 +158,15 @@ def computeH_ransac(locs1, locs2, opts):
      
     maxInliers = num_inlier.max()
     bestH2to1 = H_record[np.argmax(num_inlier)]
-
+    # print()
+    # print('inliers_record shape is', inliers_record.shape)
+    # print()
+    # print(np.argmax(num_inlier))
+    inliers = inliers_record[:,np.argmax(num_inlier)]
         # if index_inlier[0].shape[0]>current_inlier:
         #      inliers = index_inlier
         #      bestH2to1 = H2to1
-    return bestH2to1, maxInliers
+    return bestH2to1, inliers, maxInliers, inliers_record,distance_record
 
 #%%
 def compositeH(H2to1, template, img):
