@@ -13,15 +13,15 @@ def get_opts():
     parser = argparse.ArgumentParser(description='16-720 HW2: Homography')
 
     ## Feature detection (requires tuning)
-    parser.add_argument('--sigma', type=float, default=0.15,
+    parser.add_argument('--sigma', type=float, default=0.10,
                         help='threshold for corner detection using FAST feature detector')
-    parser.add_argument('--ratio', type=float, default=0.85,
+    parser.add_argument('--ratio', type=float, default=0.6,
                         help='ratio for BRIEF feature descriptor')
 
     ## Ransac (requires tuning)
     parser.add_argument('--max_iters', type=int, default=5000,
                         help='the number of iterations to run RANSAC for')
-    parser.add_argument('--inlier_tol', type=float, default=10.0,
+    parser.add_argument('--inlier_tol', type=float, default=10,
                         help='the tolerance value for considering a point to be an inlier')
 
     ## Additional options (add your own hyperparameters here)

@@ -45,10 +45,12 @@ def computeH(x1, x2):
         #print(A)
 
     u,s,v = np.linalg.svd(A)
-  
+    #print(A)
+    #w,v = np.linalg.eigh(np.matmul(np.transpose(A), A))
+    #H2to1 = v[:,0].reshape(3,3)
     H2to1 = (v[-1,:]/v[-1,-1]).reshape(3,3)
-    # H2to1 = (v[-1,:]).reshape(3,3)
-    
+    # H2to1 = np.transpose(v[:,0].reshape(3,3))
+    # H2to1 = cv2.findHomography(x1,x2)
     return H2to1
 
 #%%
@@ -142,5 +144,5 @@ y2 = y1 - 100
 u = np.column_stack((x1,y1))
 x = np.column_stack((x2,y2))
 
-result = computeH(x,x)
-result1, T1, T2 = computeH_norm(x,x)
+result = computeH(u,x)
+result1, T1, T2 = computeH_norm(u,x)
