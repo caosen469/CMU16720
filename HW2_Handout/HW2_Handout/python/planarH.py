@@ -98,6 +98,7 @@ def computeH_ransac(locs1, locs2, opts):
     
     num_inlier = np.zeros(max_iters)
     H_record = [None] * max_iters
+    inliers_record = np.empty((locs1.shape[0], 0))
     for i in range(max_iters):
     # for i in range(1):
         
@@ -131,6 +132,8 @@ def computeH_ransac(locs1, locs2, opts):
         
         # 计算误差
         tempInliersNum = 0
+        
+        curr_inliers = np.zeros((locs1.shape[0],1))
         for j in range(locs1.shape[0]):
             # print(locs2to1.shape)
             # print(locs1.shape)
@@ -140,7 +143,8 @@ def computeH_ransac(locs1, locs2, opts):
             
             if currDist < inlier_tol:
                 tempInliersNum += 1
-        
+                curr_inliers[j,0] = 1
+        inliers_record = np.append(inliers_record, curr_inliers,axis=1)
         num_inlier[i] = tempInliersNum
         H_record[i] = H2to1
         
@@ -153,13 +157,16 @@ def computeH_ransac(locs1, locs2, opts):
         # 统计inlier
         # index_inlier = np.where(error_distance<inlier_tol)
      
-    maxInliers = num_inlier.max()
+    
     bestH2to1 = H_record[np.argmax(num_inlier)]
-
+    print('Inliers shape', inliers.shape)
+    print()
+    print('argmax is', np.argmax(num_inlier))
+    inliers = inliers_record[:,np.argmax(num_inlier)]
         # if index_inlier[0].shape[0]>current_inlier:
         #      inliers = index_inlier
         #      bestH2to1 = H2to1
-    return bestH2to1, maxInliers
+    return bestH2to1, inliers
 
 #%%
 def compositeH(H2to1, template, img):
@@ -180,6 +187,10 @@ def compositeH(H2to1, template, img):
     img_new = cv2.warpPerspective(template, H2to1, (img.shape[1],img.shape[0]))
     mask = cv2.inRange(img_new,0,255)
     mask = cv2.bitwise_not(mask)
+    
+    img_bg = cv2.bitwise_and(img, img, mask = cv2.bitwise_not(mask))
+    
+    composite_img = cv2.add(img_bg, img_new)
     #Create mask of same size as template
 
     #Warp mask by appropriate homography
