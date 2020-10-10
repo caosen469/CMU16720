@@ -168,10 +168,18 @@ def compositeH(H2to1, template, img):
     #of the image using the homography
 
     #Note that the homography we compute is from the image to the template;
+    
     #x_template = H2to1*x_photo
+    
     #For warping the template to the image, we need to invert it.
     
-    composite_img = cv2.warpPerspective(img, template)
+    
+    
+
+    # composite_img = cv2.warpPerspective(img, template)
+    img_new = cv2.warpPerspective(template, H2to1, (img.shape[1],img.shape[0]))
+    mask = cv2.inRange(img_new,0,255)
+    mask = cv2.bitwise_not(mask)
     #Create mask of same size as template
 
     #Warp mask by appropriate homography
@@ -182,6 +190,3 @@ def compositeH(H2to1, template, img):
     
     return composite_img
 
-# [240, 163],
-# plotMatches(img,img_rotate,matches, locs1, locs2)
-# cv2.circle(img,(locs1[240,:][0],locs1[240,:][1]),5,(0,0,0),4)
