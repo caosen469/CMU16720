@@ -19,7 +19,7 @@ def get_opts():
                         help='ratio for BRIEF feature descriptor')
 
     ## Ransac (requires tuning)
-    parser.add_argument('--max_iters', type=int, default=5000,
+    parser.add_argument('--max_iters', type=int, default=500,
                         help='the number of iterations to run RANSAC for')
     parser.add_argument('--inlier_tol', type=float, default=10,
                         help='the tolerance value for considering a point to be an inlier')

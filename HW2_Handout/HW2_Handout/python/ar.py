@@ -44,12 +44,14 @@ cv_width = cv_cover.shape[1]
 
 # composite_img = compositeH(H1, panda_crop, book_frame)
 #%% Create Video Writer
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi',fourcc, 20.0, (book.shape[1],book.shape[2]))
+ 
+fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+# fourcc = cv2.VideoWriter_fourcc('m','p','4','v')
+out = cv2.VideoWriter('output.avi',fourcc, 20.0, (book.shape[2],book.shape[3]),)
 #%%
 # for each frame:
-# for i in range(min(book.shape[0], panda.shape[0])):
-for i in range(1):
+for i in range(min(book.shape[0], panda.shape[0])):
+# for i in range(1):
     book_frame = book[i,:,:,:]
     panda_frame = panda[i,:,:,:]
     
@@ -58,14 +60,6 @@ for i in range(1):
     panda_frame = cv2.resize(panda_frame, (int(panda_frame.shape[1]*(cv_cover.shape[0]/panda_frame.shape[0])), cv_cover.shape[0]))
     
     matches, locs1, locs2 = matchPics(book_frame,cv_cover, opts)
-
-    # 将panda裁剪成cv_cover的尺寸
-        #找到图片中心点
-    mid_height = (panda_frame.shape[0]+1)//2
-    mid_width = (panda_frame.shape[1]+1)//2
-        #找到cv_cover的尺寸
-    panda_crop = panda_frame[mid_height-cv_height//2:mid_height+cv_height//2, mid_width-cv_width//2:mid_width+cv_width//2,:]
-    
     locs1 = locs1[matches[:,0],:]
     locs1[:,[0,1]] = locs1[:,[1,0]]
 
@@ -74,7 +68,22 @@ for i in range(1):
 
     result = computeH_ransac(locs1, locs2, opts)
     H1 = result[0]
+    # 将panda裁剪成cv_cover的尺寸
+        #找到图片中心点
+    mid_height = (panda_frame.shape[0]+1)//2
+    mid_width = (panda_frame.shape[1]+1)//2
+        #找到cv_cover的尺寸
+    panda_crop = panda_frame[mid_height-cv_height//2:mid_height+cv_height//2, mid_width-cv_width//2:mid_width+cv_width//2,:]
+    
+
 
     composite_img = compositeH(H1, panda_crop, book_frame)
+    
+    # cv2.imshow('1',composite_img)
+    # cv2.waitKey(1)
+    # cv2.destroyAllWindows()
+
     out.write(composite_img)
+    
+out.release()
 

@@ -107,7 +107,8 @@ def computeH_ransac(locs1, locs2, opts):
         # np.random.shuffle(locs)
         # locs_1 = locs[0:4,0:2]
         # locs_2 = locs[0:4,2:4]
-        
+        if (locs1.shape[0]<4):
+            continue
         randomIndex = np.random.choice(locs1.shape[0],4,replace=False)
         locs_1 = locs1[randomIndex, :]
         locs_2 = locs2[randomIndex, :]
